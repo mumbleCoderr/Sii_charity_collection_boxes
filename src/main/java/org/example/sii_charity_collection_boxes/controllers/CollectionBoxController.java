@@ -28,4 +28,9 @@ public class CollectionBoxController {
     public ResponseEntity<List<CollectionBoxResponseDto>> getAllCollectionBoxes(){
         return collectionBoxService.getAllCollectionBoxes();
     }
+
+    @DeleteMapping("/unregister/{id}")
+    public ResponseEntity<Void> unregisterCollectionBox(@PathVariable("id") long id){
+        return collectionBoxService.unregisterCollectionBox(id);
+    }
 }

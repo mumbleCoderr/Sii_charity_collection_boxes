@@ -11,10 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class CollectionBoxService {
@@ -59,5 +56,12 @@ public class CollectionBoxService {
             collectionBoxResponseDtos.add(collectionBoxResponseDto);
         });
         return ResponseEntity.ok(collectionBoxResponseDtos);
+    }
+
+    public ResponseEntity<Void> unregisterCollectionBox(long id){
+        CollectionBox collectionBox = collectionBoxRepository.findById(id)
+                        .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
+        collectionBoxRepository.delete(collectionBox);
+        return ResponseEntity.noContent().build();
     }
 }

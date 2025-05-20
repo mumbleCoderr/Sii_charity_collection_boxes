@@ -15,7 +15,7 @@ public class CollectionBox {
     @JoinColumn(name = "event_id")
     private Event event;
 
-    @OneToMany(mappedBy = "collectionBox")
+    @OneToMany(mappedBy = "collectionBox", cascade = CascadeType.ALL)
     private List<BoxMoney> boxMonies;
     public long getId() {
         return id;
