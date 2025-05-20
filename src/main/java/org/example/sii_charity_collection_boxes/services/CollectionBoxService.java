@@ -27,7 +27,7 @@ public class CollectionBoxService {
         String uniqueIdentifier = collectionBoxDto.getIdentifier();
         Optional<CollectionBox> existingBox = collectionBoxRepository.findByIdentifier(uniqueIdentifier);
         if (existingBox.isPresent()) throw new ResponseStatusException(HttpStatus.CONFLICT, "Collection box with this identifier already exists.");
-
+            //TODO UNIKALNE WALUTY
         CollectionBox collectionBox = new CollectionBox();
         collectionBox.setIdentifier(collectionBoxDto.getIdentifier());
         collectionBoxRepository.save(collectionBox);
