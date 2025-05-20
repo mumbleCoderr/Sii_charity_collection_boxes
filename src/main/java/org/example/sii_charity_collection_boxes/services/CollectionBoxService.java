@@ -1,5 +1,6 @@
 package org.example.sii_charity_collection_boxes.services;
 
+import org.example.sii_charity_collection_boxes.dto.CollectionBoxResponseDto;
 import org.example.sii_charity_collection_boxes.dto.RegisterCollectionBoxDto;
 import org.example.sii_charity_collection_boxes.entities.CollectionBox;
 import org.example.sii_charity_collection_boxes.repositories.CollectionBoxRepository;
@@ -9,6 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -38,5 +43,21 @@ public class CollectionBoxService {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(collectionBox);
+    }
+
+    public ResponseEntity<List<CollectionBoxResponseDto>> getAllCollectionBoxes(){
+        List<CollectionBoxResponseDto> collectionBoxResponseDtos = new ArrayList<>();
+        List<CollectionBox> collectionBoxes = collectionBoxRepository.findAll();
+
+        collectionBoxes.forEach(c -> {
+            CollectionBoxResponseDto collectionBoxResponseDto = new CollectionBoxResponseDto();
+            collectionBoxResponseDto.setIdentifier(c.getIdentifier());
+            collectionBoxResponseDto.setAssigned(c.getEvent() != null);
+            Map<String, BigDecimal> amounts = boxMoneyService.getBoxesMoneyAmounts(c);
+            if(amounts.values().stream().allMatch(amount -> amount.compareTo(BigDecimal.ZERO) == 0))
+                collectionBoxResponseDto.setEmpty(true);
+            collectionBoxResponseDtos.add(collectionBoxResponseDto);
+        });
+        return ResponseEntity.ok(collectionBoxResponseDtos);
     }
 }

@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class BoxMoneyService {
@@ -35,5 +33,14 @@ public class BoxMoneyService {
             }
         }
         return boxMonies;
+    }
+
+    public Map<String, BigDecimal> getBoxesMoneyAmounts(CollectionBox collectionBox){
+        List<BoxMoney> boxesMoney = boxMoneyRepository.findByCollectionBox(collectionBox)
+                .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
+
+        Map<String, BigDecimal> amounts = new HashMap<>();
+        boxesMoney.forEach(b -> amounts.put(b.getCurrency(), b.getAmount()));
+        return amounts;
     }
 }
