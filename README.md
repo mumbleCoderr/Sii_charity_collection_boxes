@@ -51,13 +51,9 @@ PATCH | http://localhost:8080/collectionbox/transfermoney/1
 
 GET | http://localhost:8080/event/getfinancialreport
 
-Thank you for the opportunity to take part in the task :)
-
-
-
 ![Sii-2025-05-20_21-52](https://github.com/user-attachments/assets/5a4e6986-520c-4cf9-82ed-850338dc5165)
 
-
+Thank you for the opportunity to take part in the task :)
 
 
 
