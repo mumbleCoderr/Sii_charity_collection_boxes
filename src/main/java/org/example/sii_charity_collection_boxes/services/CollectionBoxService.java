@@ -23,20 +23,23 @@ public class CollectionBoxService {
     private final CollectionBoxRepository collectionBoxRepository;
     private final EventRepository eventRepository;
     private final BoxMoneyService boxMoneyService;
-    private final CurrencyService currencyService;
 
     public CollectionBoxService(CollectionBoxRepository collectionBoxRepository, EventRepository eventRepository,
-                                BoxMoneyService boxMoneyService, CurrencyService currencyService) {
+                                BoxMoneyService boxMoneyService) {
         this.collectionBoxRepository = collectionBoxRepository;
         this.eventRepository = eventRepository;
         this.boxMoneyService = boxMoneyService;
-        this.currencyService = currencyService;
     }
 
     @Transactional
     public ResponseEntity<CollectionBox> registerCollectionBox(RegisterCollectionBoxDto collectionBoxDto) {
         if (collectionBoxDto.getCurrencies().size() > 3)
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Collection box can hold up to 3 different currencies.");
+        boolean hasInvalidCurrency = collectionBoxDto.getCurrencies().stream()
+                .anyMatch(c -> c == null || c.trim().isEmpty() || !c.matches("^[A-Z]{3}$"));
+        if (hasInvalidCurrency)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid currency code.");
+
         String uniqueIdentifier = collectionBoxDto.getIdentifier();
         Optional<CollectionBox> existingBox = collectionBoxRepository.findByIdentifier(uniqueIdentifier);
         if (existingBox.isPresent())
@@ -61,9 +64,9 @@ public class CollectionBoxService {
             CollectionBoxResponseDto collectionBoxResponseDto = new CollectionBoxResponseDto();
             collectionBoxResponseDto.setIdentifier(c.getIdentifier());
             collectionBoxResponseDto.setAssigned(c.getEvent() != null);
-            Map<String, BigDecimal> amounts = boxMoneyService.getBoxesMoneyAmounts(c);
-            if (amounts.values().stream().allMatch(amount -> amount.compareTo(BigDecimal.ZERO) == 0))
-                collectionBoxResponseDto.setEmpty(true);
+            BigDecimal totalAmount = boxMoneyService.getBoxesMoneyAmounts(c);
+            collectionBoxResponseDto.setEmpty(totalAmount.compareTo(BigDecimal.ZERO) == 0);
+
             collectionBoxResponseDtos.add(collectionBoxResponseDto);
         });
         return ResponseEntity.ok(collectionBoxResponseDtos);
@@ -81,8 +84,9 @@ public class CollectionBoxService {
                 .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NoSuchElementException("Event not found."));
-        if ()
-        collectionBox.setEvent(event); //TODO VALIDACJA CZY PUSTA
+        if (boxMoneyService.getBoxesMoneyAmounts(collectionBox).compareTo(BigDecimal.ZERO) != 0)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only empty collection boxes can be assigned to the event");
+        collectionBox.setEvent(event);
         collectionBoxRepository.save(collectionBox);
         return ResponseEntity.ok(collectionBox);
     }
@@ -106,7 +110,6 @@ public class CollectionBoxService {
         Event event = eventRepository.findByCollectionBox(collectionBox)
                 .orElseThrow(() -> new NoSuchElementException("Event not found."));
         
-        //TODO VALIDACJA CURRENCY PRZY DODAWNAIU
         BigDecimal moneyToTransfer = boxMoneyService.transferMoney(collectionBox, event);
         BigDecimal previousEventBalance = event.getBalance();
         event.setBalance(previousEventBalance.add(moneyToTransfer));

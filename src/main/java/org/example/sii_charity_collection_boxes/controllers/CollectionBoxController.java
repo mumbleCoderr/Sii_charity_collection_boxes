@@ -3,7 +3,6 @@ package org.example.sii_charity_collection_boxes.controllers;
 import org.example.sii_charity_collection_boxes.dto.BoxMoneyAmountDto;
 import org.example.sii_charity_collection_boxes.dto.CollectionBoxResponseDto;
 import org.example.sii_charity_collection_boxes.dto.RegisterCollectionBoxDto;
-import org.example.sii_charity_collection_boxes.entities.BoxMoney;
 import org.example.sii_charity_collection_boxes.entities.CollectionBox;
 import org.example.sii_charity_collection_boxes.entities.Event;
 import org.example.sii_charity_collection_boxes.services.CollectionBoxService;

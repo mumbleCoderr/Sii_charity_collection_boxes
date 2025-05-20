@@ -4,7 +4,6 @@ import org.example.sii_charity_collection_boxes.entities.BoxMoney;
 import org.example.sii_charity_collection_boxes.entities.CollectionBox;
 import org.example.sii_charity_collection_boxes.entities.Event;
 import org.example.sii_charity_collection_boxes.repositories.BoxMoneyRepository;
-import org.example.sii_charity_collection_boxes.repositories.CollectionBoxRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,13 +21,13 @@ public class BoxMoneyService {
         this.currencyService = currencyService;
     }
 
-    public List<BoxMoney> registerBoxMoney(Set<String> currencies, CollectionBox collectionBox){
+    public List<BoxMoney> registerBoxMoney(Set<String> currencies, CollectionBox collectionBox) {
         List<BoxMoney> boxMonies = new ArrayList<>();
 
-        for (String currency : currencies){
-            if(currency != null){
+        for (String currency : currencies) {
+            if (currency != null) {
                 BoxMoney boxMoney = new BoxMoney();
-                boxMoney.setCurrency(currency);
+                boxMoney.setCurrency(currency.toUpperCase());
                 boxMoney.setAmount(new BigDecimal(0));
                 boxMoney.setCollectionBox(collectionBox);
                 boxMoneyRepository.save(boxMoney);
@@ -38,16 +37,19 @@ public class BoxMoneyService {
         return boxMonies;
     }
 
-    public Map<String, BigDecimal> getBoxesMoneyAmounts(CollectionBox collectionBox){
+    public BigDecimal getBoxesMoneyAmounts(CollectionBox collectionBox) {
         List<BoxMoney> boxMonies = boxMoneyRepository.findByCollectionBox(collectionBox)
                 .orElseThrow(() -> new NoSuchElementException("Money boxes not found."));
 
-        Map<String, BigDecimal> amounts = new HashMap<>();
-        boxMonies.forEach(b -> amounts.put(b.getCurrency(), b.getAmount()));
-        return amounts;
+        BigDecimal totalAmount = new BigDecimal(0);
+        for (BoxMoney boxMoney : boxMonies) {
+            totalAmount = totalAmount.add(boxMoney.getAmount());
+        }
+
+        return totalAmount;
     }
 
-    public BoxMoney putMoney(CollectionBox collectionBox, String currency, BigDecimal amount){
+    public BoxMoney putMoney(CollectionBox collectionBox, String currency, BigDecimal amount) {
         BoxMoney boxMoney = boxMoneyRepository.findByCollectionBoxWithCurrency(collectionBox, currency)
                 .orElseThrow(() -> new NoSuchElementException("Box money with this currency not found"));
 
@@ -56,16 +58,20 @@ public class BoxMoneyService {
         return boxMoney;
     }
 
-    public BigDecimal transferMoney(CollectionBox collectionBox, Event event){
+    public BigDecimal transferMoney(CollectionBox collectionBox, Event event) {
         List<BoxMoney> boxMonies = boxMoneyRepository.findByCollectionBox(collectionBox)
                 .orElseThrow(() -> new NoSuchElementException("Money boxes not found."));
 
         BigDecimal totalConvertedAmount = new BigDecimal(0);
-        for (BoxMoney boxMoney : boxMonies){
-            if(boxMoney.getAmount().compareTo(BigDecimal.ZERO) > 0){
-                BigDecimal convertedAmount = currencyService.convertCurrency(boxMoney.getCurrency(), event.getCurrency(), boxMoney.getAmount());
-                totalConvertedAmount = totalConvertedAmount.add(convertedAmount);
-                boxMoney.setAmount(new BigDecimal(0));
+        for (BoxMoney boxMoney : boxMonies) {
+            if (boxMoney.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                try {
+                    BigDecimal convertedAmount = currencyService.convertCurrency(boxMoney.getCurrency(), event.getCurrency(), boxMoney.getAmount());
+                    totalConvertedAmount = totalConvertedAmount.add(convertedAmount);
+                    boxMoney.setAmount(new BigDecimal(0));
+                }catch (Exception e){
+                    throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Convertion failed for this specific currency.", e);
+                }
             }
         }
         return totalConvertedAmount;

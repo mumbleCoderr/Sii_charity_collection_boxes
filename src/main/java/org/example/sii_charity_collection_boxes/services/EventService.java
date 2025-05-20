@@ -28,7 +28,13 @@ public class EventService {
     public ResponseEntity<List<FinancialReportResponseDto>> getFinancialReport(){
         List<Event> events = eventRepository.findAll();
         List<FinancialReportResponseDto> financialReport = new ArrayList<>();
-        events.forEach(e -> financialReport.add(new FinancialReportResponseDto(e.getName(), e.getBalance(), e.getCurrency())));
+        events.forEach(e -> {
+            FinancialReportResponseDto financialReportResponseDto = new FinancialReportResponseDto();
+            financialReportResponseDto.setEventName(e.getName());
+            financialReportResponseDto.setBalance(e.getBalance());
+            financialReportResponseDto.setCurrency(e.getCurrency());
+            financialReport.add(financialReportResponseDto);
+        });
 
         return ResponseEntity.ok(financialReport);
     }

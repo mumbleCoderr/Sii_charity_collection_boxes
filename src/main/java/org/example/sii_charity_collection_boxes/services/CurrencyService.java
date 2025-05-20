@@ -12,11 +12,11 @@ import java.math.BigDecimal;
 public class CurrencyService {
     private final String API_KEY = "d84231fab177ed30b2228d15f8eee2f2";
 
-    public BigDecimal convertCurrency(String from, String to, BigDecimal amount){
+    public BigDecimal convertCurrency(String from, String to, BigDecimal amount) throws Exception{
         String url = "https://api.exchangerate.host/convert?access_key=" + API_KEY + "&from=" + from + "&to=" + to + "&amount=" + amount;
 
         RestTemplate restTemplate = new RestTemplate();
-        try {
+
             String response = restTemplate.getForObject(url, String.class);
 
             ObjectMapper mapper = new ObjectMapper();
@@ -28,10 +28,5 @@ public class CurrencyService {
             }
 
             return resultNode.decimalValue();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new BigDecimal(0);
-        }
     }
 }
