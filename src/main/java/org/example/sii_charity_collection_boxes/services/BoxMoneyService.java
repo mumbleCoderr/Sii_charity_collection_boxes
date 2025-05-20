@@ -11,21 +11,19 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class BoxMoneyService {
     private final BoxMoneyRepository boxMoneyRepository;
-    private final CollectionBoxRepository collectionBoxRepository;
 
-    public BoxMoneyService(BoxMoneyRepository boxMoneyRepository, CollectionBoxRepository collectionBoxRepository) {
+    public BoxMoneyService(BoxMoneyRepository boxMoneyRepository) {
         this.boxMoneyRepository = boxMoneyRepository;
-        this.collectionBoxRepository = collectionBoxRepository;
     }
 
-    public List<BoxMoney> registerBoxMoney(String[] currencies, long id){
+    public List<BoxMoney> registerBoxMoney(Set<String> currencies, CollectionBox collectionBox){
         List<BoxMoney> boxMonies = new ArrayList<>();
-        CollectionBox collectionBox = collectionBoxRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection box not found"));
+
         for (String currency : currencies){
             if(currency != null){
                 BoxMoney boxMoney = new BoxMoney();

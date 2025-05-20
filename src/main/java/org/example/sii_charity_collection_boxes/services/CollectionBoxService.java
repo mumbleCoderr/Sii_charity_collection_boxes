@@ -24,15 +24,16 @@ public class CollectionBoxService {
 
     @Transactional
     public ResponseEntity<CollectionBox> registerCollectionBox(RegisterCollectionBoxDto collectionBoxDto){
+        if (collectionBoxDto.getCurrencies().size() > 3) throw new ResponseStatusException(HttpStatus.CONFLICT, "Collection box can hold up to 3 different currencies.");
         String uniqueIdentifier = collectionBoxDto.getIdentifier();
         Optional<CollectionBox> existingBox = collectionBoxRepository.findByIdentifier(uniqueIdentifier);
         if (existingBox.isPresent()) throw new ResponseStatusException(HttpStatus.CONFLICT, "Collection box with this identifier already exists.");
-            //TODO UNIKALNE WALUTY
+
         CollectionBox collectionBox = new CollectionBox();
         collectionBox.setIdentifier(collectionBoxDto.getIdentifier());
         collectionBoxRepository.save(collectionBox);
 
-        boxMoneyService.registerBoxMoney(collectionBoxDto.getCurrencies());
+        boxMoneyService.registerBoxMoney(collectionBoxDto.getCurrencies(), collectionBox);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

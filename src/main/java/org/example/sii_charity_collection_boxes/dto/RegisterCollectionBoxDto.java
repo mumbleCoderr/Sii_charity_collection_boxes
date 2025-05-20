@@ -1,8 +1,10 @@
 package org.example.sii_charity_collection_boxes.dto;
 
+import java.util.Set;
+
 public class RegisterCollectionBoxDto {
     private String identifier;
-    private String[] currencies;
+    private Set<String> currencies;
 
     public String getIdentifier() {
         return identifier;
@@ -12,11 +14,11 @@ public class RegisterCollectionBoxDto {
         this.identifier = identifier;
     }
 
-    public String[] getCurrencies() {
+    public Set<String> getCurrencies() {
         return currencies;
     }
 
-    public void setCurrencies(String[] currencies) {
+    public void setCurrencies(Set<String> currencies) {
         this.currencies = currencies;
     }
 }
