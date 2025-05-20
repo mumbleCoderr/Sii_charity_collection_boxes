@@ -1,5 +1,6 @@
 package org.example.sii_charity_collection_boxes.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -13,6 +14,7 @@ public class Event {
     private long id;
 
     @OneToMany(mappedBy = "event")
+    @JsonIgnore
     private List<CollectionBox> collectionBoxes;
     private String name;
     private String currency;

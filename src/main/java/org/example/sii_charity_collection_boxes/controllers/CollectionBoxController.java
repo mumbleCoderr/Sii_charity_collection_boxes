@@ -33,4 +33,9 @@ public class CollectionBoxController {
     public ResponseEntity<Void> unregisterCollectionBox(@PathVariable("id") long id){
         return collectionBoxService.unregisterCollectionBox(id);
     }
+
+    @PatchMapping("/assign/{boxId}")
+    public ResponseEntity<CollectionBox> assignCollectionBoxToEvent(@PathVariable long boxId, @RequestParam long eventId){
+        return collectionBoxService.assignCollectionBoxToEvent(boxId, eventId);
+    }
 }

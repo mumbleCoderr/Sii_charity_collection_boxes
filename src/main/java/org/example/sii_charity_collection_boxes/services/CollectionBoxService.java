@@ -3,7 +3,9 @@ package org.example.sii_charity_collection_boxes.services;
 import org.example.sii_charity_collection_boxes.dto.CollectionBoxResponseDto;
 import org.example.sii_charity_collection_boxes.dto.RegisterCollectionBoxDto;
 import org.example.sii_charity_collection_boxes.entities.CollectionBox;
+import org.example.sii_charity_collection_boxes.entities.Event;
 import org.example.sii_charity_collection_boxes.repositories.CollectionBoxRepository;
+import org.example.sii_charity_collection_boxes.repositories.EventRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,10 +19,12 @@ import java.util.*;
 public class CollectionBoxService {
 
     private final CollectionBoxRepository collectionBoxRepository;
+    private final EventRepository eventRepository;
     private final BoxMoneyService boxMoneyService;
 
-    public CollectionBoxService(CollectionBoxRepository collectionBoxRepository, BoxMoneyService boxMoneyService) {
+    public CollectionBoxService(CollectionBoxRepository collectionBoxRepository, EventRepository eventRepository, BoxMoneyService boxMoneyService) {
         this.collectionBoxRepository = collectionBoxRepository;
+        this.eventRepository = eventRepository;
         this.boxMoneyService = boxMoneyService;
     }
 
@@ -63,5 +67,15 @@ public class CollectionBoxService {
                         .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
         collectionBoxRepository.delete(collectionBox);
         return ResponseEntity.noContent().build();
+    }
+
+    public ResponseEntity<CollectionBox> assignCollectionBoxToEvent(long boxId, long eventId){
+        CollectionBox collectionBox = collectionBoxRepository.findById(boxId)
+                .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
+        Event event = eventRepository.findById(eventId)
+                        .orElseThrow(() -> new NoSuchElementException("Event not found."));
+        collectionBox.setEvent(event);
+        collectionBoxRepository.save(collectionBox);
+        return ResponseEntity.ok(collectionBox);
     }
 }
