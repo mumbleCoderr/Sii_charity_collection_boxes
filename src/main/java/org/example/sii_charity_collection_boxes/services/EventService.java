@@ -1,11 +1,12 @@
 package org.example.sii_charity_collection_boxes.services;
 
-import org.example.sii_charity_collection_boxes.dto.FinancialReportDto;
+import org.example.sii_charity_collection_boxes.dto.FinancialReportResponseDto;
 import org.example.sii_charity_collection_boxes.entities.Event;
 import org.example.sii_charity_collection_boxes.repositories.EventRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,16 +18,19 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
-    public Event addEvent(Event event){
-        return eventRepository.save(event);
+    public ResponseEntity<Event> addEvent(Event event){
+        eventRepository.save(event);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(event);
     }
 
-    public List<FinancialReportDto> getFinancialReport(){
+    public ResponseEntity<List<FinancialReportResponseDto>> getFinancialReport(){
         List<Event> events = eventRepository.findAll();
         events.forEach(System.out::println);
-        List<FinancialReportDto> financialReport = new ArrayList<>();
-        events.forEach(e -> financialReport.add(new FinancialReportDto(e.getName(), e.getBalance(), e.getCurrency())));
+        List<FinancialReportResponseDto> financialReport = new ArrayList<>();
+        events.forEach(e -> financialReport.add(new FinancialReportResponseDto(e.getName(), e.getBalance(), e.getCurrency())));
 
-        return financialReport;
+        return ResponseEntity.ok(financialReport);
     }
 }

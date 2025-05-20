@@ -1,8 +1,9 @@
 package org.example.sii_charity_collection_boxes.controllers;
 
-import org.example.sii_charity_collection_boxes.dto.FinancialReportDto;
+import org.example.sii_charity_collection_boxes.dto.FinancialReportResponseDto;
 import org.example.sii_charity_collection_boxes.entities.Event;
 import org.example.sii_charity_collection_boxes.services.EventService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,12 +18,12 @@ public class EventController {
     }
 
     @PostMapping("/add")
-    public Event addEvent(@RequestBody Event event){
+    public ResponseEntity<Event> addEvent(@RequestBody Event event){
         return eventService.addEvent(event);
     }
 
     @GetMapping("/getfinancialreport")
-    public List<FinancialReportDto> getFinancialReport(){
+    public ResponseEntity<List<FinancialReportResponseDto>> getFinancialReport(){
         return eventService.getFinancialReport();
     }
 }

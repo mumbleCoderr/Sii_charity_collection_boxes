@@ -2,12 +2,12 @@ package org.example.sii_charity_collection_boxes.dto;
 
 import java.math.BigDecimal;
 
-public class FinancialReportDto {
+public class FinancialReportResponseDto {
     private String eventName;
     private BigDecimal balance;
     private String currency;
 
-    public FinancialReportDto(String eventName, BigDecimal balance, String currency) {
+    public FinancialReportResponseDto(String eventName, BigDecimal balance, String currency) {
         this.eventName = eventName;
         this.balance = balance;
         this.currency = currency;
