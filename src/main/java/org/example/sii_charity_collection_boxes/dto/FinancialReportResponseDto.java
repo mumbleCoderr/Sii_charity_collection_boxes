@@ -7,12 +7,6 @@ public class FinancialReportResponseDto {
     private BigDecimal balance;
     private String currency;
 
-    public FinancialReportResponseDto(String eventName, BigDecimal balance, String currency) {
-        this.eventName = eventName;
-        this.balance = balance;
-        this.currency = currency;
-    }
-
     public String getEventName() {
         return eventName;
     }
