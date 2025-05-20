@@ -18,4 +18,14 @@ public interface BoxMoneyRepository extends JpaRepository<BoxMoney, Long> {
             """
     )
     Optional<List<BoxMoney>> findByCollectionBox(CollectionBox collectionBox);
+
+    @Query(
+            """
+                SELECT b 
+                FROM BoxMoney b
+                WHERE b.collectionBox = :collectionBox
+                AND b.currency = :currency
+            """
+    )
+    Optional<BoxMoney> findByCollectionBoxWithCurrency(CollectionBox collectionBox, String currency);
 }

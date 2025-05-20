@@ -36,11 +36,20 @@ public class BoxMoneyService {
     }
 
     public Map<String, BigDecimal> getBoxesMoneyAmounts(CollectionBox collectionBox){
-        List<BoxMoney> boxesMoney = boxMoneyRepository.findByCollectionBox(collectionBox)
-                .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
+        List<BoxMoney> boxMonies = boxMoneyRepository.findByCollectionBox(collectionBox)
+                .orElseThrow(() -> new NoSuchElementException("money boxes not found."));
 
         Map<String, BigDecimal> amounts = new HashMap<>();
-        boxesMoney.forEach(b -> amounts.put(b.getCurrency(), b.getAmount()));
+        boxMonies.forEach(b -> amounts.put(b.getCurrency(), b.getAmount()));
         return amounts;
+    }
+
+    public BoxMoney putMoney(CollectionBox collectionBox, String currency, BigDecimal amount){
+        BoxMoney boxMoney = boxMoneyRepository.findByCollectionBoxWithCurrency(collectionBox, currency)
+                .orElseThrow(() -> new NoSuchElementException("Box money with this currency not found"));
+
+        boxMoney.setAmount(boxMoney.getAmount().add(amount));
+        boxMoneyRepository.save(boxMoney);
+        return boxMoney;
     }
 }

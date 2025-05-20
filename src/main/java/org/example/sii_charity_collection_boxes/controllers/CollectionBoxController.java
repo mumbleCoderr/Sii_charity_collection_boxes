@@ -1,12 +1,15 @@
 package org.example.sii_charity_collection_boxes.controllers;
 
+import org.example.sii_charity_collection_boxes.dto.BoxMoneyAmountDto;
 import org.example.sii_charity_collection_boxes.dto.CollectionBoxResponseDto;
 import org.example.sii_charity_collection_boxes.dto.RegisterCollectionBoxDto;
+import org.example.sii_charity_collection_boxes.entities.BoxMoney;
 import org.example.sii_charity_collection_boxes.entities.CollectionBox;
 import org.example.sii_charity_collection_boxes.services.CollectionBoxService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -37,5 +40,10 @@ public class CollectionBoxController {
     @PatchMapping("/assign/{boxId}")
     public ResponseEntity<CollectionBox> assignCollectionBoxToEvent(@PathVariable long boxId, @RequestParam long eventId){
         return collectionBoxService.assignCollectionBoxToEvent(boxId, eventId);
+    }
+
+    @PatchMapping("/putmoney/{boxId}")
+    public ResponseEntity<BoxMoneyAmountDto> putMoney(@PathVariable long boxId, @RequestParam String currency, @RequestParam BigDecimal amount){
+        return collectionBoxService.putMoney(boxId, currency, amount);
     }
 }
