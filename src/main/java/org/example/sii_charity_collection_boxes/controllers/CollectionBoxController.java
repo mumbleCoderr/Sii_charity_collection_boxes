@@ -5,6 +5,7 @@ import org.example.sii_charity_collection_boxes.dto.CollectionBoxResponseDto;
 import org.example.sii_charity_collection_boxes.dto.RegisterCollectionBoxDto;
 import org.example.sii_charity_collection_boxes.entities.BoxMoney;
 import org.example.sii_charity_collection_boxes.entities.CollectionBox;
+import org.example.sii_charity_collection_boxes.entities.Event;
 import org.example.sii_charity_collection_boxes.services.CollectionBoxService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,5 +46,10 @@ public class CollectionBoxController {
     @PatchMapping("/putmoney/{boxId}")
     public ResponseEntity<BoxMoneyAmountDto> putMoney(@PathVariable long boxId, @RequestParam String currency, @RequestParam BigDecimal amount){
         return collectionBoxService.putMoney(boxId, currency, amount);
+    }
+
+    @PatchMapping("/transfermoney/{boxId}")
+    public ResponseEntity<Event> transferMoney(@PathVariable long boxId){
+        return collectionBoxService.transferMoney(boxId);
     }
 }

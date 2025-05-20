@@ -27,7 +27,6 @@ public class EventService {
 
     public ResponseEntity<List<FinancialReportResponseDto>> getFinancialReport(){
         List<Event> events = eventRepository.findAll();
-        events.forEach(System.out::println);
         List<FinancialReportResponseDto> financialReport = new ArrayList<>();
         events.forEach(e -> financialReport.add(new FinancialReportResponseDto(e.getName(), e.getBalance(), e.getCurrency())));
 

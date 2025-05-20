@@ -12,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -25,16 +23,18 @@ public class CollectionBoxService {
     private final CollectionBoxRepository collectionBoxRepository;
     private final EventRepository eventRepository;
     private final BoxMoneyService boxMoneyService;
+    private final CurrencyService currencyService;
 
-    public CollectionBoxService(CollectionBoxRepository collectionBoxRepository,
-                                EventRepository eventRepository, BoxMoneyService boxMoneyService) {
+    public CollectionBoxService(CollectionBoxRepository collectionBoxRepository, EventRepository eventRepository,
+                                BoxMoneyService boxMoneyService, CurrencyService currencyService) {
         this.collectionBoxRepository = collectionBoxRepository;
         this.eventRepository = eventRepository;
         this.boxMoneyService = boxMoneyService;
+        this.currencyService = currencyService;
     }
 
     @Transactional
-    public ResponseEntity<CollectionBox> registerCollectionBox(RegisterCollectionBoxDto collectionBoxDto){
+    public ResponseEntity<CollectionBox> registerCollectionBox(RegisterCollectionBoxDto collectionBoxDto) {
         if (collectionBoxDto.getCurrencies().size() > 3)
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Collection box can hold up to 3 different currencies.");
         String uniqueIdentifier = collectionBoxDto.getIdentifier();
@@ -53,7 +53,7 @@ public class CollectionBoxService {
                 .body(collectionBox);
     }
 
-    public ResponseEntity<List<CollectionBoxResponseDto>> getAllCollectionBoxes(){
+    public ResponseEntity<List<CollectionBoxResponseDto>> getAllCollectionBoxes() {
         List<CollectionBoxResponseDto> collectionBoxResponseDtos = new ArrayList<>();
         List<CollectionBox> collectionBoxes = collectionBoxRepository.findAll();
 
@@ -62,31 +62,32 @@ public class CollectionBoxService {
             collectionBoxResponseDto.setIdentifier(c.getIdentifier());
             collectionBoxResponseDto.setAssigned(c.getEvent() != null);
             Map<String, BigDecimal> amounts = boxMoneyService.getBoxesMoneyAmounts(c);
-            if(amounts.values().stream().allMatch(amount -> amount.compareTo(BigDecimal.ZERO) == 0))
+            if (amounts.values().stream().allMatch(amount -> amount.compareTo(BigDecimal.ZERO) == 0))
                 collectionBoxResponseDto.setEmpty(true);
             collectionBoxResponseDtos.add(collectionBoxResponseDto);
         });
         return ResponseEntity.ok(collectionBoxResponseDtos);
     }
 
-    public ResponseEntity<Void> unregisterCollectionBox(long id){
+    public ResponseEntity<Void> unregisterCollectionBox(long id) {
         CollectionBox collectionBox = collectionBoxRepository.findById(id)
-                        .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
+                .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
         collectionBoxRepository.delete(collectionBox);
         return ResponseEntity.noContent().build();
     }
 
-    public ResponseEntity<CollectionBox> assignCollectionBoxToEvent(long boxId, long eventId){
+    public ResponseEntity<CollectionBox> assignCollectionBoxToEvent(long boxId, long eventId) {
         CollectionBox collectionBox = collectionBoxRepository.findById(boxId)
                 .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
         Event event = eventRepository.findById(eventId)
-                        .orElseThrow(() -> new NoSuchElementException("Event not found."));
-        collectionBox.setEvent(event);
+                .orElseThrow(() -> new NoSuchElementException("Event not found."));
+        if ()
+        collectionBox.setEvent(event); //TODO VALIDACJA CZY PUSTA
         collectionBoxRepository.save(collectionBox);
         return ResponseEntity.ok(collectionBox);
     }
 
-    public ResponseEntity<BoxMoneyAmountDto> putMoney(long boxId, String currency, BigDecimal amount){
+    public ResponseEntity<BoxMoneyAmountDto> putMoney(long boxId, String currency, BigDecimal amount) {
         CollectionBox collectionBox = collectionBoxRepository.findById(boxId)
                 .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
         BoxMoney boxMoney = boxMoneyService.putMoney(collectionBox, currency, amount);
@@ -94,5 +95,22 @@ public class CollectionBoxService {
         boxMoneyAmountDto.setCurrency(boxMoney.getCurrency());
         boxMoneyAmountDto.setAmount(boxMoney.getAmount());
         return ResponseEntity.ok(boxMoneyAmountDto);
+    }
+
+    @Transactional
+    public ResponseEntity<Event> transferMoney(long boxId) {
+        CollectionBox collectionBox = collectionBoxRepository.findById(boxId)
+                .orElseThrow(() -> new NoSuchElementException("Collection box not found."));
+        if (collectionBox.getEvent() == null)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Collection box is not assigned to any event.");
+        Event event = eventRepository.findByCollectionBox(collectionBox)
+                .orElseThrow(() -> new NoSuchElementException("Event not found."));
+        
+        //TODO VALIDACJA CURRENCY PRZY DODAWNAIU
+        BigDecimal moneyToTransfer = boxMoneyService.transferMoney(collectionBox, event);
+        BigDecimal previousEventBalance = event.getBalance();
+        event.setBalance(previousEventBalance.add(moneyToTransfer));
+        eventRepository.save(event);
+        return ResponseEntity.ok(event);
     }
 }
